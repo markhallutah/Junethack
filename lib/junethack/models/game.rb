@@ -224,7 +224,8 @@ class Game
     def version=(version)
       _version = 'unh'   if version.start_with? 'UNH-'
       _version = 'dnh'   if version.start_with? 'DNH-'
-      _version = 'ndnh'  if version == 'DNH-2022.5.30'
+      _version = 'ndnh'   if version.start_with? 'NDNH-'
+      _version = 'nndnh'  if version.start_with? 'NNDNH-'
       _version = 'slth'  if version.start_with? 'slth-'
       _version = 'slex'  if version.start_with? 'slex-'
       _version = '3.6'   if version == '3.6.1'
@@ -361,9 +362,50 @@ class Game
     property :killed_medusa, Integer,
       :default => -> (r,p) { r.defeated_medusa? ? 1 : 0 }
 
-    def defeated_medusa?
+    # in 2025, replaced this with more complicated code for Ana/Dwa and Ana/Elf
+    def defeated_medusa_2024? 
         (achieve and achieve.hex & 0x00800 > 0) or (event_defeated_medusa?)
     end
+
+    # just check the killed medusa achievement bit
+    def defeated_medusa_achieve? 
+        achieve and achieve.hex & 0x00800 > 0
+    end
+
+    # is this variant a dnh derivative?
+    def dnhalike?      
+        #version.start_with?( 'dnh', 'ndnh', 'nndnh')  # alternate method 
+        version.include( 'dnh')
+    end
+
+    # is this game Ana Dwarf or Ana Elf?  Medusa defeat is different for those games
+    def anaspecial?
+        role == 'Ana' and (race == 'Elf' or race == 'Dwa')
+    end
+
+    def defeated_medusa_and_ascended?
+        defeated_medusa_achieve? and ascended
+    end
+  
+    # dnh variants only count medusa kills for some race/role combos if you ascend
+    def dnh_defeated_medusa?
+        dnhalike? and ((anaspecial? and defeated_medusa_and_ascended?) or ((not anaspecial?) and defeated_medusa_achieve?)
+    end
+
+    # most variants count medusa kills for all games
+    def most_variants_defeated_medusa?       #
+        (not dnhalike?) and ((achieve and defeated_medusa_achieve?) or (event_defeated_medusa?))
+    end
+
+    def defeated_medusa?
+        most_variants_defeated_medusa? or dnh_defeated_medusa?
+    end
+
+        achieve and achieve.hex & 0x00800 > 0
+    end
+
+
+
 
     ## AceHack and UnNetHack specific
     # Assault on Fort Knox
