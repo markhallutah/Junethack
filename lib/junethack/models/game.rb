@@ -362,9 +362,8 @@ class Game
     property :killed_medusa, Integer,
       :default => -> (r,p) { r.defeated_medusa? ? 1 : 0 }
 
-    # in 2025, replaced this with more complicated code for Ana/Dwa and Ana/Elf
-    def defeated_medusa_2024? 
-        (achieve and achieve.hex & 0x00800 > 0) or (event_defeated_medusa?)
+    def defeated_medusa?
+        most_variants_defeated_medusa? or dnh_defeated_medusa?
     end
 
     # just check the killed medusa achievement bit
@@ -396,14 +395,6 @@ class Game
     def most_variants_defeated_medusa?       #
         (not dnhalike?) and ((achieve and defeated_medusa_achieve?) or (event_defeated_medusa?))
     end
-
-    def defeated_medusa?
-        most_variants_defeated_medusa? or dnh_defeated_medusa?
-    end
-
-        achieve and achieve.hex & 0x00800 > 0
-    end
-
 
 
 
